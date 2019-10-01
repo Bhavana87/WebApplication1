@@ -1,0 +1,518 @@
+﻿
+@{
+    ViewBag.Title = "Seats";
+    Layout = null;
+}
+
+@*<link href="http://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">*@
+<link href="~/Styles/jquery.seat-charts.css" rel="stylesheet" />
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #fafafa;
+    }
+
+    a {
+        color: #b71a4c;
+    }
+
+    .front-indicator {
+        width: 145px;
+        margin: 5px 32px 15px 32px;
+        background-color: #f6f6f6;
+        color: #adadad;
+        text-align: center;
+        padding: 3px;
+        border-radius: 5px;
+    }
+
+    /*.wrapper {
+        width: 100%;
+        text-align: center;
+        margin-top: 150px;
+    }*/
+
+    /*.container {
+        margin: 0 auto;
+        width: 500px;
+        text-align: left;
+    }*/
+
+    .booking-details {
+        float: left;
+        text-align: left;
+        margin-left: 35px;
+        font-size: 12px;
+        position: relative;
+        height: 401px;
+    }
+
+        .booking-details h2 {
+            margin: 25px 0 20px 0;
+            font-size: 17px;
+        }
+
+        .booking-details h3 {
+            margin: 5px 5px 0 0;
+            font-size: 14px;
+        }
+
+    div.seatCharts-cell {
+        color: #182C4E;
+        height: 25px;
+        width: 25px;
+        line-height: 25px;
+    }
+
+    div.seatCharts-seat {
+        color: #FFFFFF;
+        cursor: pointer;
+    }
+
+    div.seatCharts-row {
+        height: 35px;
+        width: 5000px;
+    }
+
+    div.seatCharts-seat.available {
+        background-color: #B9DEA0;
+    }
+
+        div.seatCharts-seat.available.first-class {
+            /* 	background: url(vip.png); */
+            background-color: #3a78c3;
+        }
+        div.seatCharts-seat.available.challenged-class {
+            /* 	background: url(vip.png); */
+            /*background ="w3s.png";*/
+            background-image: url('../../images/download.png');
+            background-size: 30px 30px;
+        }
+
+    div.seatCharts-seat.focused {
+        background-color: #76B474;
+    }
+
+    div.seatCharts-seat.selected {
+        background-color: #E6CAC4;
+    }
+
+    div.seatCharts-seat.unavailable {
+        background-color: #472B34;
+    }
+
+    div.seatCharts-container {
+        /*border-right: 1px dotted #adadad;*/
+        width: auto;
+        padding: 20px;
+        float: left;
+    }
+
+    div.seatCharts-legend {
+        padding-left: 0px;
+        position: absolute;
+        bottom: 16px;
+    }
+
+    ul.seatCharts-legendList {
+        padding-left: 0px;
+    }
+
+    span.seatCharts-legendDescription {
+        margin-left: 5px;
+        line-height: 30px;
+    }
+
+    .checkout-button {
+        display: block;
+        margin: 10px 0;
+        font-size: 14px;
+    }
+
+    #selected-seats {
+        max-height: 90px;
+        overflow-y: scroll;
+        overflow-x: none;
+        width: 170px;
+    }
+</style>
+<div class="container">
+    <div class="row col-sm-12" id="seats">
+        <div id="seat-map">
+            <div class="front-indicator">Front</div>
+        </div>
+    </div>
+</div>
+<div id="result1"></div>
+<div class="container">
+    <div class="row col-sm-12">
+        <div class="col-sm-6">           
+           
+                <div class="booking-details">
+                    <h2>Booking Details</h2>
+                    <h3> Selected Seats (<span id="counter">0</span>):</h3>
+                    <ul id="selected-seats"></ul>
+                    Total: <b>$<span id="total">0</span></b>
+                    <button class="checkout-button">Checkout &raquo;</button>
+                </div>
+                <div id="legend"></div>
+                                   
+        </div>
+        <div class="col-sm-6">
+            <form id="lrrows">
+                <div class="form-group">
+                    <input type="text" value="" placeholder="total rows" id="trows" />
+                </div>
+                <div class="form-group">
+                    <input type="text" value="" placeholder="total seats" id="tseats" />
+                </div>
+                <div class="form-group">
+                    <input type="text" value="" placeholder="vipseats" id="vipscount" />
+                </div>
+                @*<p>Please give how many left and right rows you want ?</p>
+                <div class="form-group">
+                    <input type="text" value="" placeholder="Left Rows" id="Lrows" />
+                </div>
+                <div class="form-group">
+                    <input type="text" value="" placeholder="Right Rows" id="Rrows" />
+                </div>*@
+                <p id="validation" style="display:none;">Please select the correct row</p>
+                <div class="form-group">
+                    <input type="text" value="" placeholder="select row" id="srow" />
+                </div>
+                <div class="form-group">
+                    <input type="text" value="" placeholder="physical seats" id="prow" />
+                </div>
+                <div class="form-group">
+                    <input type="button" onclick="myfunc();" value="submit" />
+                </div>
+                <label id="trseats"></label>
+            </form>
+        </div>
+    </div>
+</div>
+@*<div class="container">
+        <div class="row col-sm-12">
+            <div class="col-lg-4">DEF</div>
+            <div class="col-lg-8">ABC</div>
+        </div>
+    </div>*@
+
+
+
+<script src="~/Scripts/jquery.min.js"></script>
+<script src="~/Scripts/jquery-seat-charts.js"></script>
+
+
+
+<script>
+    //var firstSeatLabel = 1;
+
+    //function evodfun() {
+
+    //    $('#result1').empty();
+
+    //    var rcount = $('#trows').val();
+
+    //    if (rcount % 2 != 0 || rcount % 2 == 0) {
+    //        $('#lrrows').append('<p>Please give how many left and right rows you want ?</p>');
+    //        $('#lrrows').append('<div class="form-group"><input type="text" value="" placeholder="Left Rows" id="Lrows" /></div><div class="form-group"><input type="text" value=""  placeholder="Right Rows" id="Rrows" /></div>');
+    //    }
+
+    //}
+
+    function myfunc() {
+        debugger;
+
+        //location.reload(true);
+
+        //firstSeatLabel = 1;
+        $('#seats').empty();
+        $('#seats').append('<div id="seat-map"><div class= "front-indicator">Front</div></div>');
+
+        $('#legend').empty();
+
+        var rs = $('#trows').val();
+        var sts = $('#tseats').val();
+        var vip = $('#vipscount').val();
+        var leftr = $('#Lrows').val();
+        var rightr = $('#Rrows').val();
+        var physical = $('#srow').val();
+        var physicalse = $('#prow').val();
+
+        var seat = rs * sts;
+        $('#trseats').empty();
+        $('#trseats').append(seat);
+
+        var seats1 = [];
+        for (var i = 0; i < rs; i++) {
+            var tseat = "e".repeat(sts);
+            seats1.push(tseat);
+        }
+
+
+        //for (var i = 0; i < vip; i++) {
+        //var vip1 = "f".repeat(vip);
+        //    seats1.push(vip1);
+        //}
+
+        //var vip1 = "f".repeat(vip);
+        //seats1.push(vip1);
+        //if (rs % 2 == 0) {
+        //    var remainder = rs / 2;
+        //    console.log(seat);
+        //    for (var i = 0; i < rs; i++) {
+        //        var tseat = "e".repeat(sts / 2) + '_' + "e".repeat(sts/2);
+        //        seats1.push(tseat);
+        //    }
+        //}
+        //else {
+        //for (var i = 0; i < rs; i++) {
+        //    var tseat = "e".repeat(leftr) + '_' + "e".repeat(rightr);
+        //    seats1.push(tseat);
+        //}
+        //}
+
+        //for (var i = 0; i < rs; i++) {
+        //    if (rs % 2 == 0) {
+        //        var remainder = rs / 2;
+
+        //        var tseat = "e".repeat(remainder) + '_' + "e".repeat(remainder);
+        //        seats1.push(tseat);
+        //    }
+        //    else {
+        //        var tseat = "e".repeat(leftr) + '_' + "e".repeat(rightr);
+        //        seats1.push(tseat);
+        //    }
+        //}
+
+        //var vip1 = "f".repeat(vip);
+        //    seats1.push(vip1);
+
+        console.log(seats1);
+        //debugger;
+        var $cart = $('#selected-seats'),
+            $counter = $('#counter'),
+            $total = $('#total'),
+            sc = $('#seat-map').seatCharts({
+                map: seats1,
+                seats: {
+                    f: {
+                        price: 100,
+                        classes: 'first-class', //your custom CSS class
+                        category: 'First Class'
+                    },
+                    e: {
+                        price: 40,
+                        classes: 'economy-class', //your custom CSS class
+                        category: 'Economy Class'
+                    },
+                    g: {
+                        price: 80,
+                        classes: 'challenged-class', //your custom CSS class
+                        category: 'Physical Class'
+                    }
+                },
+                naming: {
+                    top: false,
+                    //getLabel: function (character, row, column) {
+                    //    return 'S'+firstSeatLabel++;
+                    //},
+                    //getLabel: function (character, row, column) {
+                    //    return firstSeatLabel++;
+                    //},
+                },
+                legend: {
+                    node: $('#legend'),
+                    items: [
+                        ['g', 'available', 'Physical Class'],
+                        ['f', 'available', 'First Class'],
+                        ['e', 'available', 'Economy Class'],
+                        ['f', 'unavailable', 'Already Booked']
+                    ]
+                },
+                click: function () {
+                    //debugger;
+                    if (this.status() == 'available') {
+                        //debugger;
+                        //let's create a new <li> which we'll add to the cart items
+                        $('<li>' + this.data().category + ' Seat # ' + this.settings.label + ': <b>$' + this.data().price + '</b> <a href="#" class="cancel-cart-item">[cancel]</a></li>')
+                            .attr('id', 'cart-item-' + this.settings.id)
+                            .data('seatId', this.settings.id)
+                            .appendTo($cart);
+
+                        /*
+                         * Lets up<a href="https://www.jqueryscript.net/time-clock/">date</a> the counter and total
+                         *
+                         * .find function will not find the current seat, because it will change its stauts only after return
+                         * 'selected'. This is why we have to add 1 to the length and the current seat price to the total.
+                         */
+                        $counter.text(sc.find('selected').length + 1);
+                        $total.text(recalculateTotal(sc) + this.data().price);
+
+                        return 'selected';
+                    } else if (this.status() == 'selected') {
+                        //debugger;
+                        //update the counter
+                        $counter.text(sc.find('selected').length - 1);
+                        //and total
+                        $total.text(recalculateTotal(sc) - this.data().price);
+
+                        //remove the item from our cart
+                        $('#cart-item-' + this.settings.id).remove();
+
+                        //seat has been vacated
+                        return 'available';
+                    } else if (this.status() == 'unavailable') {
+                        //debugger;
+                        //seat has been already booked
+                        return 'unavailable';
+                    } else {
+                        //debugger;
+                        return this.style();
+                    }
+                }
+            });
+
+        //debugger;
+        //this will handle "[cancel]" link clicks
+        $('#selected-seats').on('click', '.cancel-cart-item', function () {
+            //debugger;
+            //let's just trigger Click event on the appropriate seat, so we don't have to repeat the logic here
+            sc.get($(this).parents('li:first').data('seatId')).click();
+        });
+
+        //let's pretend some seats have already been booked
+        sc.get(['1_2', '4_1', '7_1', '7_2']).status('unavailable');
+        //sc.get(['1_1', '1_2', '1_3', '1_4']).status('first-class available');
+        //var a = seats1.length;
+        //console.log(a);
+
+        //$.each(seats1, function (index, value) {
+        //    $("#result1").append(index + ": " + value + '<br>');
+        //});
+
+
+        //var firstcls = [];
+        //for (var i = 1; i < seats1.length; i++) {
+        //    var k = 1;
+        //    while (k <= sts) {
+        //        if (parseInt(vip) == firstcls.length) {
+        //            console.log(seats1.length);
+        //            break;
+        //        }
+        //        else {
+        //            var a = i + '_' + k;
+        //            firstcls.push(a);
+        //            k++;
+        //        }
+        //    }
+        //}
+
+
+        var firstcls = [];        for (var i = 1; i < seats1.length; i++) {            var k = 1;            while (k <= sts) {                if (parseInt(vip) == firstcls.length) {                    console.log(seats1.length);                    break;                }                else {                    var a = i + '_' + k;                    firstcls.push(a);                    k++;                }            }        }
+
+        sc.get(firstcls).status('first-class available');
+        console.log(firstcls);
+
+
+        var pseats = [];
+        if (physical < seats1.length) {
+            var a = $('.seatCharts-container').find('.seatCharts-row');
+            //var s = physical - 1;
+            var b = $(a[physical - 1]).find('.seatCharts-seat');
+            for (var i = 0; i < physicalse; i++) {
+                var ids = $(b[i]).attr('id');
+                pseats.push(ids);
+            }
+        }
+        else {
+            $('#validation').css('display', 'block');
+        }
+
+        sc.get(pseats).status('challenged-class available');
+        console.log(pseats);
+
+        //if () {
+        //        $('#lrrows').append('<p>Please give how many left and right rows you want ?</p>');
+        //        $('#lrrows').append('<div class="form-group"><input type="text" value="" placeholder="Left Rows" id="Lrows" /></div><div class="form-group"><input type="text" value=""  placeholder="Right Rows" id="Rrows" /></div>');
+        //    }
+
+        //var firstcls1 = [];        //for (var i = 1; i < seats1.length; i++) {        //    var k = 1;        //    while (k <= sts) {        //        if (parseInt(physical) == firstcls1.length) {        //            console.log(seats1.length);        //            break;        //        }        //        else {        //            var a = i + '_' + k;        //            firstcls1.push(a);        //            k++;        //        }        //    }        //}
+        
+        //sc.get(firstcls1).status('challenged-class available');
+        //console.log(firstcls1);
+        //var firstcls = [];
+        //for (var i = 1; i < seats1.length; i++) {
+        //    var k = 1;
+        //    while (k <= sts) {
+        //        var b = 1;
+
+
+        //        if (parseInt(vip) % 2 == 0)
+        //            b = Math.round(parseInt(vip) / 10);
+        //        else
+        //            b = Math.round(parseInt(sts) / 10);
+
+        //        console.log(b);
+
+        //        if (sts % 2 != 0) {
+        //            if (parseInt(vip) == firstcls.length) {
+        //                console.log(seats1.length);
+        //                break;
+        //            }
+        //            else {
+        //                var a = i + '_' + k;
+        //                firstcls.push(a);
+        //                k++;
+        //            }
+        //        }
+        //        else {
+        //            if (parseInt(vip) + b == firstcls.length) {
+        //                console.log(seats1.length);
+        //                break;
+        //            }
+        //            else {
+        //                debugger;
+        //                if (k == sts / 2) {
+        //                    console.log('a');
+        //                    var a = i + '_' + k;
+        //                    firstcls.push(a);
+        //                    k = k + 1;
+        //                }
+        //                else {
+        //                    var a = i + '_' + (k);
+        //                    firstcls.push(a);
+
+        //                        if (k == sts) {
+        //                            var a = i + '_' + (k + 1);
+        //                            firstcls.push(a);
+        //                        }
+        //                    k = k + 1;
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
+
+       
+        $('#trows').val('');
+        $('#tseats').val('');
+
+    }
+
+    function recalculateTotal(sc) {
+        //debugger;
+        var total = 0;
+
+        //basically find every selected seat and sum its price
+        sc.find('selected').each(function () {
+            total += this.data().price;
+        });
+
+        return total;
+    }
+
+</script>
+
