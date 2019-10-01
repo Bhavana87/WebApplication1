@@ -11,12 +11,13 @@ namespace WebApplication1.Controllers
         // GET: Home
         public ActionResult Index()
         {
+
             return View();
         }
 
         public ActionResult Seats()
         {
-            return View();
+            return RedirectToAction("Index");
         }
     }
 }
