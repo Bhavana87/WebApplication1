@@ -17,7 +17,7 @@ namespace WebApplication1.Controllers
 
         public ActionResult Seats()
         {
-            return RedirectToAction("Index");
+            return view();
         }
     }
 }
